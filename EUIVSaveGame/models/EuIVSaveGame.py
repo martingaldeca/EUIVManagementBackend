@@ -124,8 +124,8 @@ class EuIVSaveGame(EuIVModel):
                 country.save()
 
             # Get the army and navy sub dicts
-            army_dict = self.get_sub_dict(country_info, key_to_look='army', excluded_keys=['army_professionalism', 'max_historic_army_professionalism', 'army_tradition'])
-            navy_dict = self.get_sub_dict(country_info, key_to_look='navy', excluded_keys=['navy_strength', 'navy_tradition'])
+            army_dict = self.get_sub_dict(country_info, key_to_look='army', excluded_keys=['army_professionalism', 'max_historic_army_professionalism', 'army_tradition', 'army_templates'])
+            navy_dict = self.get_sub_dict(country_info, key_to_look='navy', excluded_keys=['navy_strength', 'navy_tradition', 'navy_templates'])
 
             # Get concrete stats
             country_stats_dict = {

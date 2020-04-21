@@ -16,13 +16,19 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
-
+from EUIVManagement.rest.views import EuIVPlatformInfo
 
 urlpatterns = [
     url(r'^jet/', include('jet.urls', 'jet')),  # Django JET URLS
     path('', admin.site.urls),
 
+    path('api/auth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+
     # EUIVManagement api
     path('api/', include('EUIVStats.urls')),
     path('api/', include('EUIVCountries.urls')),
+    path('api/', include('EUIVSaveGame.urls')),
+
+    path('api/platform_info', EuIVPlatformInfo.as_view(), name='database_info'),
+
 ]

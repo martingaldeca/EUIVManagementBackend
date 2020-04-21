@@ -1,5 +1,4 @@
 from django.db import models
-from ast import literal_eval
 from EUIVManagement.helpers import EuIVModel
 
 
@@ -16,7 +15,9 @@ class EuIVCountry(EuIVModel):
         Function to return the rgb color
         :return:
         """
-        return literal_eval(self.color)
+        rgb_color = self.color.replace('"', '').replace("'", '').replace('[', '').replace(']', '').split()
+        hex_color = '#%02x%02x%02x' % (int(rgb_color[0]), int(rgb_color[1]), int(rgb_color[2]))
+        return hex_color
 
     class Meta:
         verbose_name = 'Countrie'
