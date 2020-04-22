@@ -17,12 +17,14 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
 from EUIVManagement.rest.views import EuIVPlatformInfo
+from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
 urlpatterns = [
     url(r'^jet/', include('jet.urls', 'jet')),  # Django JET URLS
     path('', admin.site.urls),
 
-    path('api/auth/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    url(r'^api/auth/token/', obtain_jwt_token),
+    url(r'^api/auth/refresh_token/', refresh_jwt_token),
 
     # EUIVManagement api
     path('api/', include('EUIVStats.urls')),

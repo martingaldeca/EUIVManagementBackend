@@ -9,9 +9,8 @@ EXTERNAL_LIBRARIES = [
     'simple_history',
     'debug_toolbar',
     'django_extensions',
-    'corsheaders',
-    'oauth2_provider',
     'rest_framework',
+    'corsheaders',
 ]
 
 INSTALLED_APPS = [
