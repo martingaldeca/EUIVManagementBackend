@@ -5,6 +5,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication'
     ],
@@ -17,6 +18,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 JWT_AUTH = {
     'JWT_ALLOW_REFRESH': True,
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=1),
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=24),
     'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(days=7),
 }
+AUTH_USER_MODEL = 'EUIVUserManagement.models.EuIVUser'

@@ -1,1 +1,1 @@
-from .EuIVUser import EuIVUser, EuIVUserTypes, EuIVUserActiveGames
+from .EuIVUser import EuIVUser, EuIVUserTypes, EuIVUserActiveGames, EuIVUserProfile

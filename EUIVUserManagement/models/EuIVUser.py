@@ -1,9 +1,12 @@
-from django.db import models
+import unicodedata
 from logging import getLogger
 from djchoices import DjangoChoices, ChoiceItem
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, UserManager
 from EUIVSaveGame.models import EuIVSaveGame
 from EUIVCountries.models import EuIVCountry
+from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 from EUIVManagement.helpers import EuIVModel
 
@@ -24,11 +27,7 @@ class EuIVUser(AbstractUser, EuIVModel):
     Model for add extra parameters to the users in the platform
     """
 
-    # Common fields for users
-    user_type = models.IntegerField(
-        choices=EuIVUserTypes.choices, default=EuIVUserTypes.player, null=True, blank=True, help_text="Select one of the user types for the platform.", verbose_name="User type"
-    )
-
+    objects = UserManager()
     # EuIV specific fields
     user_active_games = models.ManyToManyField(
         EuIVSaveGame, related_name='active_games', verbose_name='User active games', help_text='All the games active where the user is playing.', through='EuIVUserActiveGames'
@@ -48,7 +47,24 @@ class EuIVUser(AbstractUser, EuIVModel):
         self.save()
 
 
+class EuIVUserProfile(EuIVModel):
+    user = models.OneToOneField(EuIVUser, on_delete=models.CASCADE, verbose_name='User', help_text='User associated to the user profile.')
+
+    # Common fields for users
+    user_type = models.IntegerField(
+        choices=EuIVUserTypes.choices, default=EuIVUserTypes.player, null=True, blank=True, help_text="Select one of the user types for the platform.", verbose_name="User type"
+    )
+    first_login = models.BooleanField(null=False, blank=False, default=True, verbose_name='First login', help_text='Field that show if the user has logged in the platform any time or not.')
+    user_avatar = models.ImageField(upload_to='Avatars/', max_length=100, null=True, blank=True, verbose_name='Avatar', help_text='The user avatar image.', default='Avatars/defaultUser.jpg')
+
+
 class EuIVUserActiveGames(EuIVModel):
     user = models.ForeignKey(EuIVUser, blank=True, null=True, db_index=True, verbose_name='User', help_text='User associated to the save game', on_delete=models.CASCADE)
     save_game = models.ForeignKey(EuIVSaveGame, blank=True, null=True, db_index=True, verbose_name='Save game', help_text='The Save game associated to the user.', on_delete=models.CASCADE)
     country = models.ForeignKey(EuIVCountry, blank=True, null=True, db_index=True, verbose_name='Country', help_text='Country used by the user in the save game.', on_delete=models.CASCADE)
+
+
+@receiver(post_save, sender=EuIVUser)
+def create_or_update_user_profile(sender, instance, created, **kwargs):
+    if created:
+        EuIVUserProfile.objects.get_or_create(user=instance)

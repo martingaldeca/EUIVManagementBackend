@@ -18,12 +18,10 @@ def create_default_countries(apps, schema_editor):
         counter = 0
         for row in csv_reader:
             counter += 1
-            euiv_country(
-                tag=row['Tag'],
-                name=row['Name']
-            ).save()
+            country_to_save, created = euiv_country.objects.get_or_create(tag=row['Tag'])
+            country_to_save.name = row['Name']
+            country_to_save.save()
     countries_file.close()
-    logger.info(f"The migration populates the countries database with {counter} countries.")
 
 
 class Migration(migrations.Migration):

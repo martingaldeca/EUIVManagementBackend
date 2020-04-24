@@ -19,8 +19,9 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATIC_ROOT = "/static/"
-MEDIA_ROOT = "/media/"
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Redefine the auth user model
 AUTH_USER_MODEL = 'EUIVUserManagement.EuIVUser'
@@ -39,3 +40,4 @@ SIMPLE_JWT = {
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
 }
+

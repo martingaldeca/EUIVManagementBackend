@@ -16,6 +16,8 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls.static import static
+from .settings import MEDIA_URL, MEDIA_ROOT
 from EUIVManagement.rest.views import EuIVPlatformInfo
 from rest_framework_jwt.views import obtain_jwt_token, refresh_jwt_token
 
@@ -30,7 +32,9 @@ urlpatterns = [
     path('api/', include('EUIVStats.urls')),
     path('api/', include('EUIVCountries.urls')),
     path('api/', include('EUIVSaveGame.urls')),
+    path('api/', include('EUIVUserManagement.urls')),
 
     path('api/platform_info', EuIVPlatformInfo.as_view(), name='database_info'),
 
 ]
+urlpatterns += static(MEDIA_URL, document_root=MEDIA_ROOT)

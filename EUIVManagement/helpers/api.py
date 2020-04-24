@@ -16,6 +16,17 @@ class EuIVListCreateAPIView(ListCreateAPIView):
         self.filter_backends = [DjangoFilterBackend]
         self.model = EuIVModel
 
+        self.extra_filters = []
+
     def get_queryset(self):
         final_query = self.model.objects.all()
+
+        # Check if there is any extra filter in the queryset and if the model has any extra filter
+        # if it is the case, just simply filter by this field
+        if len(self.extra_filters) > 0 and len(self.request.query_params) > 0:
+            extra_filter_dict = {}
+            for extra_filter in self.extra_filters:
+                extra_filter_dict[extra_filter] = self.request.query_params.get(extra_filter)
+            final_query = final_query.filter(**extra_filter_dict)
+
         return final_query
