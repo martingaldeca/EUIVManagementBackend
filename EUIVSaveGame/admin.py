@@ -37,8 +37,8 @@ class EuIVPathConfigAdmin(admin.ModelAdmin):
         'euiv_path',
     )
     list_filter = ('creation_datetime', 'modification_datetime')
-    actions = ('get_file_games_in_path',)
+    actions = ('get_and_process_all_savegames_in_path',)
 
-    def get_file_games_in_path(self, request, queryset):
+    def get_and_process_all_savegames_in_path(self, request, queryset):
         for path in queryset:
-            path.get_all_savegames_in_path()
+            path.get_and_process_all_savegames_in_path()
