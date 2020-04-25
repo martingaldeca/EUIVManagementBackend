@@ -47,3 +47,19 @@ def get_list_of_files(dir_name: str) -> list:
             all_files.append(full_path)
 
     return all_files
+
+
+def clean_database_for_tests():
+    from EUIVSaveGame.models import EuIVPathConfig, EuIVSaveGame
+    from EUIVCountries.models import EuIVCountry, EuIVProvince
+    from EUIVUserManagement.models import EuIVUser, EuIVUserProfile, EuIVUserActiveGames
+    from EUIVStats.models import EuIVCountryStats, EuIVProvinceStats
+    EuIVSaveGame.objects.all().delete()
+    EuIVPathConfig.objects.all().delete()
+    EuIVCountry.objects.all().delete()
+    EuIVProvince.objects.all().delete()
+    EuIVUser.objects.all().delete()
+    EuIVUserProfile.objects.all().delete()
+    EuIVUserActiveGames.objects.all().delete()
+    EuIVCountryStats.objects.all().delete()
+    EuIVProvinceStats.objects.all().delete()
