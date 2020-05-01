@@ -1,3 +1,5 @@
 /euiv
 /venv/
 /.idea
+/logs/
+/media/*

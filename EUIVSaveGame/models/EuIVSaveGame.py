@@ -1,5 +1,6 @@
 import threading
 import time
+import uuid
 from typing import List
 
 from django.db import models, IntegrityError
@@ -22,7 +23,9 @@ class EuIVSaveGame(EuIVModel):
     savegame_size = models.FloatField(verbose_name='Savegame size (MB)', help_text='Size in MB of the savegame.', default=-1, blank=False, null=False)
 
     # Complementary fields provided by the user
-    savegame_name = models.CharField(max_length=50, default='Savegame name', verbose_name='Savegame name', help_text='The name of the savegame to use.', blank=False, null=False, db_index=True)
+    savegame_name = models.CharField(
+        max_length=50, default=uuid.uuid4(), verbose_name='Savegame name', help_text='The name of the savegame to use.', blank=False, null=False, db_index=True, unique=True
+    )
     savegame_description = models.CharField(max_length=300, verbose_name='Savegame description', help_text='The description of the savegame.', blank=True, null=True)
 
     # Info obtained from the file
@@ -39,6 +42,10 @@ class EuIVSaveGame(EuIVModel):
         blank=False, null=False, default=60 * 10, verbose_name='Check time', help_text='The time to wait until the next check in seconds (from 5 minutes to 1 hour)',
         validators=[MinValueValidator(60 * 5), MaxValueValidator(60 * 60)]
     )
+    hits_until_end_of_streaming = models.IntegerField(
+        blank=False, null=False, default=3, verbose_name='Record max hits',
+        help_text='The number of savegame process without changes until the end of stream.', validators=[MinValueValidator(1), MaxValueValidator(10)]
+    )
 
     class Meta:
         verbose_name = 'Save game'
@@ -50,10 +57,25 @@ class EuIVSaveGame(EuIVModel):
     def process_file(self):
         """
         Function to process savegame file.
+
+        The process can be of an active game or hard process of a file.
+
+        If the savegame is active instead of look to the auto save game, and will associate the stats to that.
         :return:
         """
-        logger.info(f"Will process raw info of '{self}'.")
-        with open(self.savegame_file) as eu_file:
+
+        savegame_file_to_read = self.savegame_file
+        if self.active:
+            logger.info(f"Will process the autosave file for the active game {self}")
+            autosave, created = EuIVSaveGame.objects.get_or_create(savegame_name='autosave')
+            if created:
+                logger.info(f"There is not any autosave yet in the path {self.euiv_path}. File {self.savegame_file} it is going to be processed.")
+                savegame_file_to_read = self.savegame_file
+            else:
+                savegame_file_to_read = autosave.savegame_file
+        else:
+            logger.info(f"Will process raw info of '{self}'.")
+        with open(savegame_file_to_read) as eu_file:
             file_lines = eu_file.readlines()
         eu_file.close()
 
@@ -62,40 +84,44 @@ class EuIVSaveGame(EuIVModel):
         self.savegame_size = get_file_size(self.savegame_file)
 
         # Parse the file lines in a cached dict
-        # TODO optimize this with multi threading processing
-        raw_dict = parse_save_game_lines(file_lines)
-        rebel_dict = self.get_sub_dict(raw_dict, 'rebel_faction')
+        # We will only process the info if the savegame has change
+        if file_lines[-1].split('=')[1] != self.savegame_checksum:
+            raw_dict = parse_save_game_lines(file_lines)
+            rebel_dict = self.get_sub_dict(raw_dict, 'rebel_faction')
 
-        # Get the checksum
-        self.savegame_checksum = raw_dict.get('checksum', None)
+            # Get the checksum
+            self.savegame_checksum = raw_dict.get('checksum', None)
 
-        # Get the save name
-        self.savegame_name = self.savegame_file.split('\\')[-1].replace('mp_autosave ', '').replace('.eu4', '').replace('"', '')
+            # Get the save name
+            self.savegame_name = self.savegame_file.split('\\')[-1].replace('mp_autosave ', '').replace('.eu4', '').replace('"', '')
 
-        # Get the savegame date
-        self.savegame_date = transform_eu4_date(raw_dict.get('date', None))
+            # Get the savegame date
+            self.savegame_date = transform_eu4_date(raw_dict.get('date', None))
 
-        # Get the enabled dlcs
-        self.savegame_dlc_enabled = raw_dict.get('dlc_enabled', None)
+            # Get the enabled dlcs
+            self.savegame_dlc_enabled = raw_dict.get('dlc_enabled', None)
 
-        # Get if is a multiplayer game
-        self.savegame_is_multi_player = True if raw_dict.get('multi_player', None) == 'yes' else False
+            # Get if is a multiplayer game
+            self.savegame_is_multi_player = True if raw_dict.get('multi_player', None) == 'yes' else False
 
-        # If is multiplayer get the payers info
-        if self.savegame_is_multi_player:
-            self.get_multi_players_info(raw_dict.get('players_countries', None), raw_dict.get('player', '').replace('"', ''))
+            # If is multiplayer get the payers info
+            if self.savegame_is_multi_player:
+                self.get_multi_players_info(raw_dict.get('players_countries', None), raw_dict.get('player', '').replace('"', ''))
 
-        # Get the provinces stats
-        province_dict = raw_dict['provinces']
-        del raw_dict['provinces']
-        self.save_province_stats(province_dict)
+            # Get the provinces stats
+            province_dict = raw_dict['provinces']
+            del raw_dict['provinces']
+            self.save_province_stats(province_dict)
 
-        # Get the countries stats
-        countries_dict = raw_dict['countries']
-        del raw_dict['countries']
-        self.save_countries_stats(countries_dict)
+            # Get the countries stats
+            countries_dict = raw_dict['countries']
+            del raw_dict['countries']
+            self.save_countries_stats(countries_dict)
 
-        self.save()
+            self.save()
+
+        else:
+            logger.info(f'The savegame file to process was previously processed.')
 
     @timeit
     def save_countries_stats(self, countries_dict: dict = None) -> None:
@@ -292,6 +318,27 @@ class EuIVSaveGame(EuIVModel):
 
         return sub_dict
 
+    def control_in_save(self, force_save: bool = False, **kwargs):
+        """
+        Check if there is any other active savegame. If it is the case we will close the previous active savegame and set this as active.
+
+        :param force_save: Parameter to force the update if needeed
+        :return:
+        """
+
+        # Check if the savegame is active and if the force save is not set
+        if self.active and not force_save:
+
+            # Get all the active savegames excluding current and check if there is any
+            active_savegames = EuIVSaveGame.objects.filter(active=True).exclude(id=self.id)
+            if active_savegames.count() > 0:
+                logger.info(f'There are {active_savegames.count} active savegames. All of them will be closed for set {self} as active.')
+                for active_savegame in active_savegames:
+                    active_savegame.active = False
+                    active_savegame.save(force_save=True)
+
+        pass
+
     def record_session(self):
         """
         With this function we start to process the file in a thread
@@ -324,7 +371,7 @@ def process_file_while_active(save_game: EuIVSaveGame):
         if save_game.savegame_checksum == previous_checksum:
             counter += 1
             logger.info(f"The session game for {save_game} seems to be ended.")
-            if counter == 3:
+            if counter == save_game.hits_until_end_of_streaming:
                 save_game.active = False
                 save_game.save()
         else:

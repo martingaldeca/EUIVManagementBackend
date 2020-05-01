@@ -8,7 +8,6 @@ class EuIVUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'last_login', 'is_superuser', 'username', 'last_name', 'email', 'is_staff', 'is_active', 'date_joined']
 
 
-
 class EuIVUserProfileSerializer(serializers.ModelSerializer):
     user = EuIVUserSerializer(many=False, read_only=False)
 
@@ -18,7 +17,6 @@ class EuIVUserProfileSerializer(serializers.ModelSerializer):
 
 
 class EuIVSimpleUserProfileSerializer(serializers.ModelSerializer):
-
     user_type = serializers.SerializerMethodField('get_user_type')
     username = serializers.SerializerMethodField('get_username')
     email = serializers.SerializerMethodField('get_email')
