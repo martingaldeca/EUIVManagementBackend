@@ -67,7 +67,8 @@ class EuIVSaveGame(EuIVModel):
         savegame_file_to_read = self.savegame_file
         if self.active:
             logger.info(f"Will process the autosave file for the active game {self}")
-            autosave, created = EuIVSaveGame.objects.get_or_create(savegame_name='autosave')
+            autosave_name = 'mp_autosave' if self.savegame_is_multi_player else 'autosave'
+            autosave, created = EuIVSaveGame.objects.get_or_create(savegame_name=autosave_name)
             if created:
                 logger.info(f"There is not any autosave yet in the path {self.euiv_path}. File {self.savegame_file} it is going to be processed.")
                 savegame_file_to_read = self.savegame_file

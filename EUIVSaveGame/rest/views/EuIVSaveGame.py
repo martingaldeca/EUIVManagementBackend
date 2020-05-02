@@ -144,3 +144,23 @@ class GetHitsUntilEndOfRecordView(APIView):
             return Response(f'Internal error, please report the issue. Savegame does not exists.', status.HTTP_500_INTERNAL_SERVER_ERROR)
 
         return Response(savegame.hits_until_end_of_streaming, status.HTTP_200_OK)
+
+
+class RecordSessionView(APIView):
+
+    @staticmethod
+    def post(request: Request):
+        """
+        Start the session record of the passed savegame.
+        :param request:
+        :return:
+        """
+        savegame_name = request.data.get('savegame_name', None)
+        try:
+            savegame = EuIVSaveGame.objects.get(savegame_name=savegame_name)
+        except EuIVSaveGame.DoesNotExist:
+            return Response(f'Internal error, please report the issue. Savegame does not exists.', status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        savegame.record_session()
+
+        return Response(f'Record of "{savegame}" started.', status.HTTP_200_OK)
