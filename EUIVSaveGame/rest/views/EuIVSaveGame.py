@@ -73,7 +73,10 @@ class ChangeCheckTimeView(APIView):
         try:
             savegame = EuIVSaveGame.objects.get(savegame_name=savegame_name)
         except EuIVSaveGame.DoesNotExist:
-            return Response(f'Internal error, please report the issue. Savegame does not exists.', status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                'Internal error, please report the issue. Savegame does not exists.',
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         # Transform to minutes
         check_time *= 60
@@ -92,7 +95,10 @@ class GetCheckTimeView(APIView):
         try:
             savegame = EuIVSaveGame.objects.get(savegame_name=savegame_name)
         except EuIVSaveGame.DoesNotExist:
-            return Response(f'Internal error, please report the issue. Savegame does not exists.', status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                'Internal error, please report the issue. Savegame does not exists.',
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(savegame.check_time / 60, status.HTTP_200_OK)
 
@@ -125,7 +131,10 @@ class ChangeHitsUntilEndOfStreamingView(APIView):
         try:
             savegame = EuIVSaveGame.objects.get(savegame_name=savegame_name)
         except EuIVSaveGame.DoesNotExist:
-            return Response(f'Internal error, please report the issue. Savegame does not exists.', status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                'Internal error, please report the issue. Savegame does not exists.',
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         # Change the hits_until_end_of_streaming
         logger.debug(f'Hits until end of record for "{savegame}" will change from "{savegame.hits_until_end_of_streaming}" to "{hits_until_end_of_streaming}".')
@@ -141,7 +150,10 @@ class GetHitsUntilEndOfRecordView(APIView):
         try:
             savegame = EuIVSaveGame.objects.get(savegame_name=savegame_name)
         except EuIVSaveGame.DoesNotExist:
-            return Response(f'Internal error, please report the issue. Savegame does not exists.', status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                'Internal error, please report the issue. Savegame does not exists.',
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         return Response(savegame.hits_until_end_of_streaming, status.HTTP_200_OK)
 
@@ -159,7 +171,10 @@ class RecordSessionView(APIView):
         try:
             savegame = EuIVSaveGame.objects.get(savegame_name=savegame_name)
         except EuIVSaveGame.DoesNotExist:
-            return Response(f'Internal error, please report the issue. Savegame does not exists.', status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                'Internal error, please report the issue. Savegame does not exists.',
+                status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
 
         savegame.record_session()
 

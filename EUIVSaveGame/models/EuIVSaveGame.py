@@ -103,7 +103,7 @@ class EuIVSaveGame(EuIVModel):
             self.savegame_dlc_enabled = raw_dict.get('dlc_enabled', None)
 
             # Get if is a multiplayer game
-            self.savegame_is_multi_player = True if raw_dict.get('multi_player', None) == 'yes' else False
+            self.savegame_is_multi_player = raw_dict.get('multi_player', None) == 'yes'
 
             # If is multiplayer get the payers info
             if self.savegame_is_multi_player:
@@ -122,7 +122,7 @@ class EuIVSaveGame(EuIVModel):
             self.save()
 
         else:
-            logger.info(f'The savegame file to process was previously processed.')
+            logger.info('The savegame file to process was previously processed.')
 
     @timeit
     def save_countries_stats(self, countries_dict: dict = None) -> None:
@@ -159,47 +159,78 @@ class EuIVSaveGame(EuIVModel):
                 'save_game': self,
                 'stats_date': date,
                 'country': country,
-                'current_power_projection': country_info.get('current_power_projection', None),
+                'current_power_projection': country_info.get(
+                    'current_power_projection', None
+                ),
                 'great_power_score': country_info.get('great_power_score', None),
                 'development': country_info.get('development', None),
                 'raw_development': country_info.get('raw_development', None),
                 'capped_development': country_info.get('capped_development', None),
                 'realm_development': country_info.get('realm_development', None),
                 'base_tax': country_info.get('base_tax', None),
-                'adm_tech': country_info.get('technology', {'adm_tech': None}).get('adm_tech', None),
-                'dip_tech': country_info.get('technology', {'dip_tech': None}).get('dip_tech', None),
-                'mil_tech': country_info.get('technology', {'mil_tech': None}).get('mil_tech', None),
+                'adm_tech': country_info.get('technology', {'adm_tech': None}).get(
+                    'adm_tech', None
+                ),
+                'dip_tech': country_info.get('technology', {'dip_tech': None}).get(
+                    'dip_tech', None
+                ),
+                'mil_tech': country_info.get('technology', {'mil_tech': None}).get(
+                    'mil_tech', None
+                ),
                 'navy_strength': country_info.get('navy_strength', None),
-                'num_owned_home_cores': country_info.get('num_owned_home_cores', None),
-                'num_of_controlled_cities': country_info.get('num_of_controlled_cities', None),
+                'num_owned_home_cores': country_info.get(
+                    'num_owned_home_cores', None
+                ),
+                'num_of_controlled_cities': country_info.get(
+                    'num_of_controlled_cities', None
+                ),
                 'num_of_total_ports': country_info.get('num_of_total_ports', None),
                 'forts': country_info.get('forts', None),
-                'average_effective_unrest': country_info.get('average_effective_unrest', None),
+                'average_effective_unrest': country_info.get(
+                    'average_effective_unrest', None
+                ),
                 'average_autonomy': country_info.get('average_autonomy', None),
                 'num_of_allies': country_info.get('num_of_allies', None),
                 'prestige': country_info.get('prestige', None),
                 'stability': country_info.get('stability', None),
                 'treasury': country_info.get('treasury', None),
                 'inflation': country_info.get('inflation', None),
-                'total_owned_provinces': len(country_info.get('owned_provinces', [])),
-                'total_controlled_provinces': len(country_info.get('controlled_provinces', [])),
+                'total_owned_provinces': len(
+                    country_info.get('owned_provinces', [])
+                ),
+                'total_controlled_provinces': len(
+                    country_info.get('controlled_provinces', [])
+                ),
                 'army_tradition': country_info.get('army_tradition', None),
                 'navy_tradition': country_info.get('navy_tradition', None),
-                'last_month_income': country_info.get('ledger', {'lastmonthincome': None}).get('lastmonthincome', None),
-                'last_month_expense': country_info.get('ledger', {'lastmonthexpense': None}).get('lastmonthexpense', None),
+                'last_month_income': country_info.get(
+                    'ledger', {'lastmonthincome': None}
+                ).get('lastmonthincome', None),
+                'last_month_expense': country_info.get(
+                    'ledger', {'lastmonthexpense': None}
+                ).get('lastmonthexpense', None),
                 'estimated_loan': country_info.get('estimated_loan', None),
                 'corruption': country_info.get('corruption', None),
                 'legitimacy': country_info.get('legitimacy', None),
                 'mercantilism': country_info.get('mercantilism', None),
                 'splendor': country_info.get('splendor', None),
-                'army_professionalism': country_info.get('army_professionalism', None),
-                'government': country_info.get('government', {'government': 'No government'}).get('government', 'No government').replace('"', ''),
+                'army_professionalism': country_info.get(
+                    'army_professionalism', None
+                ),
+                'government': country_info.get(
+                    'government', {'government': 'No government'}
+                )
+                .get('government', 'No government')
+                .replace('"', ''),
                 'manpower': country_info.get('manpower', None),
                 'max_manpower': country_info.get('max_manpower', None),
                 'sailors': country_info.get('sailors', None),
                 'max_sailors': country_info.get('max_sailors', None),
-                'is_great_power': True if country_info.get('is_great_power', 'no') == 'yes' else False,
-                'government_reform_progress': country_info.get('government_reform_progress', None),
+                'is_great_power': country_info.get('is_great_power', 'no')
+                == 'yes',
+                'government_reform_progress': country_info.get(
+                    'government_reform_progress', None
+                ),
             }
             all_countries_stats.append(
                 EuIVCountryStats(**country_stats_dict)
@@ -337,8 +368,6 @@ class EuIVSaveGame(EuIVModel):
                 for active_savegame in active_savegames:
                     active_savegame.active = False
                     active_savegame.save(force_save=True)
-
-        pass
 
     def record_session(self):
         """

@@ -16,8 +16,11 @@ class EuIVCountry(EuIVModel):
         :return:
         """
         rgb_color = self.color.replace('"', '').replace("'", '').replace('[', '').replace(']', '').split()
-        hex_color = '#%02x%02x%02x' % (int(rgb_color[0]), int(rgb_color[1]), int(rgb_color[2]))
-        return hex_color
+        return '#%02x%02x%02x' % (
+            int(rgb_color[0]),
+            int(rgb_color[1]),
+            int(rgb_color[2]),
+        )
 
     class Meta:
         verbose_name = 'Countrie'
