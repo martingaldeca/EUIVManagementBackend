@@ -8,9 +8,7 @@ def transform_eu4_date(euiv_date: str = None) -> datetime:
     :param euiv_date:
     :return:
     """
-    if euiv_date is None:
-        return None
-    return datetime.strptime(euiv_date, '%Y.%m.%d')
+    return None if euiv_date is None else datetime.strptime(euiv_date, '%Y.%m.%d')
 
 
 def get_file_size(file_name: str) -> float:
@@ -32,7 +30,7 @@ def get_list_of_files(dir_name: str) -> list:
     :return:
     """
     list_of_file = os.listdir(dir_name)
-    all_files = list()
+    all_files = []
 
     # Iterate over all the entries
     for entry in list_of_file:

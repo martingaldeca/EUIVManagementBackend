@@ -15,9 +15,7 @@ def create_default_countries(apps, schema_editor):
     euiv_country = apps.get_model("EUIVCountries", "EuIVCountry")
     with open('EUIVCountries/countries.csv') as countries_file:
         csv_reader = csv.DictReader(countries_file)
-        counter = 0
         for row in csv_reader:
-            counter += 1
             country_to_save, created = euiv_country.objects.get_or_create(tag=row['Tag'])
             country_to_save.name = row['Name']
             country_to_save.save()

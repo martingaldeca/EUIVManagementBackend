@@ -13,8 +13,7 @@ def parse_save_game_lines(lines: List[str]) -> dict:
     :return:
     """
 
-    final_dict = parse_lines(lines[1:])
-    return final_dict
+    return parse_lines(lines[1:])
 
 
 def parse_lines(lines: List[str]) -> dict:
@@ -54,11 +53,7 @@ def parse_lines(lines: List[str]) -> dict:
         if '={' in line and '}' in line:
             line = line.replace('}', '')
             special_line = line.split('{')
-            dict_lines.append(f"{special_line[0]}{{")
-            dict_lines.append(special_line[1])
-            dict_lines.append('}')
-
-        # Case 1
+            dict_lines.extend((f"{special_line[0]}{{", special_line[1], '}'))
         elif '={' in line:
             reading_dict = True
             total_brackets += 1
@@ -84,7 +79,6 @@ def parse_lines(lines: List[str]) -> dict:
 
             continue
 
-        # total_brackets should decrease
         elif '}' in line:
             total_brackets -= 1
 
@@ -116,7 +110,6 @@ def parse_lines(lines: List[str]) -> dict:
                 not_named_keys_counter += 1
             dict_lines.append(line)
 
-        # Case 2
         elif '=' in line:
             # Check if multiple =
             if line.count('=') == 1:
